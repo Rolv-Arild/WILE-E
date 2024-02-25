@@ -16,11 +16,21 @@
 
 from absl import flags
 from acme.agents.jax import ppo
+from dm_env import specs
+from rlgym.rocket_league.action_parsers import RepeatAction, LookupTableAction
+from rlgym.rocket_league.done_conditions import GoalCondition, NoTouchTimeoutCondition, TimeoutCondition
+from rlgym.rocket_league.obs_builders import DefaultObs
+from rlgym.rocket_league.reward_functions import TouchReward, CombinedReward, GoalReward
+from rlgym.rocket_league.state_mutators import KickoffMutator, FixedTeamSizeMutator
+
 import helpers
 from absl import app
 from acme.jax import experiments
 from acme.utils import lp_utils
 import launchpad as lp
+
+from wile_e.config_objects import VelocityPlayerToBallReward
+from wile_e.dm_rl import RocketLeague
 
 FLAGS = flags.FLAGS
 
@@ -29,18 +39,35 @@ flags.DEFINE_bool(
                              'way. If False, will run single-threaded.')
 flags.DEFINE_string('env_name', 'control:cartpole:balance', 'What environment to run')
 flags.DEFINE_integer('seed', 0, 'Random seed.')
-flags.DEFINE_integer('num_steps', 1_000_000, 'Number of env steps to run.')
-flags.DEFINE_integer('eval_every', 50_000, 'How often to run evaluation.')
+flags.DEFINE_integer('num_steps', 100_000_000_000, 'Number of env steps to run.')
+flags.DEFINE_integer('eval_every', 1_000_000, 'How often to run evaluation.')
 flags.DEFINE_integer('evaluation_episodes', 10, 'Evaluation episodes.')
 flags.DEFINE_integer('num_distributed_actors', 64,
                      'Number of actors to use in the distributed setting.')
 
 
+def make_environment():
+    state_mutators = [FixedTeamSizeMutator(), KickoffMutator()]
+    obs_builder = DefaultObs(zero_padding=1)
+    tick_skip = 8
+    action_parser = RepeatAction(LookupTableAction(), tick_skip)
+    reward_function = CombinedReward(
+        (VelocityPlayerToBallReward(), tick_skip / 120),
+        (TouchReward(), tick_skip / 120),
+        (GoalReward(), 60)
+    )
+    terminal_conditions = [GoalCondition()]
+    truncation_conditions = [NoTouchTimeoutCondition(60), TimeoutCondition(5 * 60)]
+    env = RocketLeague(state_mutators, obs_builder, action_parser, reward_function,
+                       terminal_conditions, truncation_conditions, discount=0.995,
+                       action_spec=specs.DiscreteArray(90),
+                       observation_spec=specs.Array((obs_builder.get_obs_space(None),), dtype=float))
+    return env
+
+
 def build_experiment_config():
     """Builds PPO experiment config which can be executed in different ways."""
     # Create an environment, grab the spec, and use it to create networks.
-    suite, task = FLAGS.env_name.split(':', 1)
-
     config = ppo.PPOConfig(
         normalize_advantage=True,
         normalize_value=True,
@@ -50,7 +77,7 @@ def build_experiment_config():
     layer_sizes = (256, 256, 256)
     return experiments.ExperimentConfig(
         builder=ppo_builder,
-        environment_factory=lambda seed: helpers.make_environment(suite, task),
+        environment_factory=make_environment,  # lambda seed: helpers.make_environment(suite, task),
         network_factory=lambda spec: ppo.make_networks(spec, layer_sizes),
         seed=FLAGS.seed,
         max_num_actor_steps=FLAGS.num_steps)
