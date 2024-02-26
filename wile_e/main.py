@@ -46,7 +46,7 @@ flags.DEFINE_integer('num_distributed_actors', 64,
                      'Number of actors to use in the distributed setting.')
 
 
-def make_environment():
+def make_environment(seed):
     state_mutators = [FixedTeamSizeMutator(), KickoffMutator()]
     obs_builder = DefaultObs(zero_padding=1)
     tick_skip = 8
