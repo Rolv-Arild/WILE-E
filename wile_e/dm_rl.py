@@ -48,7 +48,6 @@ class RocketLeague(dm_env.Environment):
             condition.reset(base_state, self.shared_info)
 
         observations = self.obs_builder.build_obs(agents, base_state, self.shared_info)
-        observations = list(observations.values())
         return dm_env.restart(observations)
 
     def step(self, action) -> TimeStep:
@@ -73,8 +72,6 @@ class RocketLeague(dm_env.Environment):
                                                    {a: is_terminated for a in agents},
                                                    {a: is_truncated for a in agents},
                                                    self.shared_info)
-        observations = list(observations.values())
-        rewards = list(rewards.values())
         if is_terminated:
             return dm_env.termination(rewards, observations)
         if is_truncated:
@@ -82,7 +79,15 @@ class RocketLeague(dm_env.Environment):
         return dm_env.transition(rewards, observations, self.discount)
 
     def observation_spec(self):
-        return self._observation_spec
+        return {k: self._observation_spec for k in self.engine.agents}
 
     def action_spec(self):
-        return self._action_spec
+        return {k: self._action_spec for k in self.engine.agents}
+
+    def reward_spec(self):
+        spec = super().reward_spec()
+        return {k: spec for k in self.engine.agents}
+
+    def discount_spec(self):
+        spec = super().discount_spec()
+        return {k: spec for k in self.engine.agents}
