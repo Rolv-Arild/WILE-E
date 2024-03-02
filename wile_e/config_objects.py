@@ -20,7 +20,7 @@ class VelocityPlayerToBallReward(RewardFunction[str, GameState, float]):
         rewards = {}
         for agent in agents:
             vel = state.cars[agent].physics.linear_velocity
-            player_ball = state.ball.position - state.cars[agent].position
+            player_ball = state.ball.position - state.cars[agent].physics.position
             rewards[agent] = vel.dot(player_ball) / CAR_MAX_SPEED
         return rewards
 
@@ -117,7 +117,7 @@ class StateQualityReward(RewardFunction[str, GameState, float]):
 
         for car in state.cars.values():
             # Bepis
-            car_ball = state.ball.position - car.position
+            car_ball = state.ball.position - car.physics.position
             car_blue_goal = closest_point_in_goal(ball_pos)
             car_orange_goal = car_blue_goal * np.array([1, -1, 1])
 
@@ -144,6 +144,6 @@ class StateQualityReward(RewardFunction[str, GameState, float]):
                     is_truncated: Dict[AgentID, bool], shared_info: Dict[str, Any]) -> Dict[AgentID, RewardType]:
         rewards = {}
         for agent in agents:
-            car = state.cars[agent]
+            car = state.cars[agent].physics
             rewards[agent] = -((car.position[0] ** 2 + car.position[1] ** 2) ** 0.5)
         return rewards
