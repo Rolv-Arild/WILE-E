@@ -35,7 +35,8 @@ class FixedLookupTableAction(ActionParser[AgentID, np.ndarray, np.ndarray, GameS
     def reset(self, initial_state: GameState, shared_info: Dict[str, Any]) -> None:
         pass
 
-    def parse_actions(self, actions: Dict[AgentID, np.ndarray], state: GameState, shared_info: Dict[str, Any]) -> Dict[AgentID, np.ndarray]:
+    def parse_actions(self, actions: Dict[AgentID, np.ndarray], state: GameState, shared_info: Dict[str, Any]) -> Dict[
+        AgentID, np.ndarray]:
         parsed_actions = {}
         for agent, action in actions.items():
             parsed_actions[agent] = self._lookup_table[action]
@@ -118,6 +119,8 @@ def make_rl_environment(seed):
     truncation_conditions = [NoTouchTimeoutCondition(60), TimeoutCondition(5 * 60)]
     env = RocketLeague(state_mutators, obs_builder, action_parser, reward_function,
                        terminal_conditions, truncation_conditions, discount=0.995,
-                       action_spec=specs.DiscreteArray(90),
-                       observation_spec=specs.Array((obs_builder.get_obs_space(None),), dtype=float))
+                       action_spec=specs.DiscreteArray(90, name="action_index"),
+                       observation_spec=specs.Array((obs_builder.get_obs_space(None),),
+                                                    dtype=float,
+                                                    name="observation"))
     return env
