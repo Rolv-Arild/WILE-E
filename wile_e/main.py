@@ -29,7 +29,7 @@ from acme.jax import experiments
 from acme.utils import lp_utils
 import launchpad as lp
 
-from wile_e.config_objects import VelocityPlayerToBallReward
+from wile_e.config_objects import VelocityPlayerToBallReward, GoalViewReward
 from wile_e.dm_rl import RocketLeague
 
 FLAGS = flags.FLAGS
@@ -54,7 +54,8 @@ def make_environment(seed):
     reward_function = CombinedReward(
         (VelocityPlayerToBallReward(), tick_skip / 120),
         (TouchReward(), tick_skip / 120),
-        (GoalReward(), 60)
+        (GoalViewReward(), 1),
+        (GoalReward(), 10)
     )
     terminal_conditions = [GoalCondition()]
     truncation_conditions = [NoTouchTimeoutCondition(60), TimeoutCondition(5 * 60)]

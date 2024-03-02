@@ -59,10 +59,10 @@ def view_goal_ratio(pos, goal_y):
 
 
 def solid_angle_ball(pos, ball_pos, ball_radius=BALL_RADIUS):
-    # Calculate the solid angle of the ball (same as disk oriented towards the "camera")
+    # Calculate the solid angle of the ball
     d = np.linalg.norm(pos - ball_pos)
-    r_sphere = math.sqrt(d ** 2 + ball_radius ** 2)
-    E = 2 * math.pi * (1 - d / r_sphere)
+    r_sphere = math.sqrt(d ** 2 - ball_radius ** 2)
+    E = 2 * math.pi * (1 - r_sphere / d)
     return E
 
 
@@ -70,6 +70,34 @@ def view_ball_ratio(pos, ball_pos):
     # Calculate the percent of the field of view that the ball takes up
     solid_angle = solid_angle_ball(pos, ball_pos)
     return solid_angle / (4 * math.pi)
+
+
+class GoalViewReward(RewardFunction[str, GameState, float]):
+
+    def __init__(self, transform="default"):
+        self.current_quality = 0.
+        if transform == "default":
+            transform = lambda x: max(math.log2(x), -20)
+        elif transform == "identity":
+            transform = lambda x: x
+        self.transform = transform
+
+    def calculate_quality(self, state: StateType):
+        ball_pos = state.ball.position
+        blue_goal_view = view_goal_ratio(ball_pos, -GOAL_THRESHOLD)
+        orange_goal_view = view_goal_ratio(ball_pos, +GOAL_THRESHOLD)
+        quality = self.transform(blue_goal_view) - self.transform(orange_goal_view)
+        return quality
+
+    def reset(self, initial_state: StateType, shared_info: Dict[str, Any]) -> None:
+        self.current_quality = self.calculate_quality(initial_state)
+
+    def get_rewards(self, agents: List[AgentID], state: StateType, is_terminated: Dict[AgentID, bool],
+                    is_truncated: Dict[AgentID, bool], shared_info: Dict[str, Any]) -> Dict[AgentID, RewardType]:
+        current_quality = self.calculate_quality(state)
+        reward = current_quality - self.current_quality
+        self.current_quality = current_quality
+        return {agent: reward for agent in agents}
 
 
 class StateQualityReward(RewardFunction[str, GameState, float]):
