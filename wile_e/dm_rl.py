@@ -48,8 +48,7 @@ class RocketLeague(dm_env.Environment):
             condition.reset(base_state, self.shared_info)
 
         observations = self.obs_builder.build_obs(agents, base_state, self.shared_info)
-        ts = TimeStep(StepType.FIRST, None, None, observations)
-        return ts
+        return dm_env.restart(observations)
 
     def step(self, action) -> TimeStep:
         engine_actions = self.action_parser.parse_actions(action, self.engine.state, self.shared_info)
@@ -73,12 +72,14 @@ class RocketLeague(dm_env.Environment):
                                                    {a: is_terminated for a in agents},
                                                    {a: is_truncated for a in agents},
                                                    self.shared_info)
-        step_type = StepType.MID if not is_terminated else StepType.LAST
-        ts = TimeStep(step_type, rewards, self.discount, observations)
-        return ts
+        if is_terminated:
+            return dm_env.termination(rewards, observations)
+        if is_truncated:
+            return dm_env.truncation(rewards, observations, self.discount)
+        return dm_env.transition(rewards, observations, self.discount)
 
     def observation_spec(self):
-        return self._observation_spec
+        return {k: self._observation_spec for k in self.engine.agents}
 
     def action_spec(self):
-        return self._action_spec
+        return {k: self._action_spec for k in self.engine.agents}
