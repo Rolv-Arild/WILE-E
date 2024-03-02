@@ -30,7 +30,7 @@ class RocketLeague(dm_env.Environment):
         self.shared_info = {}
 
         self.num_agents = 2
-        self.agents = ["blue-0", "orange-0"]
+        self.agents = ["blue_0", "orange_0"]
 
         self._action_spec = action_spec
         self._observation_spec = observation_spec

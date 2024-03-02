@@ -1,5 +1,9 @@
+from typing import Dict, Any
+
 from dm_env import specs
+from rlgym.api import StateMutator, StateType
 from rlgym.rocket_league.action_parsers import RepeatAction, LookupTableAction
+from rlgym.rocket_league.api import GameState
 from rlgym.rocket_league.done_conditions import GoalCondition, NoTouchTimeoutCondition, TimeoutCondition
 from rlgym.rocket_league.obs_builders import DefaultObs
 from rlgym.rocket_league.reward_functions import TouchReward, CombinedReward, GoalReward
@@ -9,8 +13,15 @@ from wile_e.config_objects import VelocityPlayerToBallReward, GoalViewReward
 from wile_e.dm_rl import RocketLeague
 
 
+class FixKeyMutator(StateMutator[GameState]):
+    # Acme uses '-' as a separator for learner names, so we need to replace it with '_'
+    def apply(self, state: StateType, shared_info: Dict[str, Any]) -> None:
+        for key in list(state.cars.keys()):
+            state.cars[key.replace("-", "_")] = state.cars.pop(key)
+
+
 def make_rl_environment(seed):
-    state_mutators = [FixedTeamSizeMutator(), KickoffMutator()]
+    state_mutators = [FixedTeamSizeMutator(), KickoffMutator(), FixKeyMutator()]
     obs_builder = DefaultObs(zero_padding=1)
     tick_skip = 8
     action_parser = RepeatAction(LookupTableAction(), tick_skip)
