@@ -29,6 +29,8 @@ class RocketLeague(dm_env.Environment):
         self.discount = discount
         self.shared_info = {}
 
+        self.num_agents = 2
+
         self._action_spec = action_spec
         self._observation_spec = observation_spec
 
@@ -38,6 +40,7 @@ class RocketLeague(dm_env.Environment):
         for mutator in self.state_mutators:
             base_state = mutator.apply(base_state, self.shared_info)
         agents = list(base_state.cars.keys())
+        self.num_agents = len(agents)
 
         self.obs_builder.reset(base_state, self.shared_info)
         self.action_parser.reset(base_state, self.shared_info)
