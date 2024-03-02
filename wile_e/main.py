@@ -55,8 +55,8 @@ def build_experiment_config() -> experiments.ExperimentConfig[
     environment_factory = _make_environment_factory(_ENV_NAME.value)
     environment = environment_factory(_SEED.value)
     agent_types = {
-        str(i): decentralized.DefaultSupportedAgent.PPO
-        for i in range(environment.num_agents)  # pytype: disable=attribute-error
+        a: decentralized.DefaultSupportedAgent.PPO
+        for a in environment.agents  # pytype: disable=attribute-error
     }
     # Example of how to set custom sub-agent configurations.
     ppo_configs = {'unroll_length': 16, 'num_minibatches': 32, 'num_epochs': 10}
