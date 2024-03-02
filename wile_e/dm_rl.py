@@ -42,6 +42,7 @@ class RocketLeague(dm_env.Environment):
             base_state = mutator.apply(base_state, self.shared_info)
         agents = list(base_state.cars.keys())
         self.num_agents = len(agents)
+        self.agents = agents
 
         self.obs_builder.reset(base_state, self.shared_info)
         self.action_parser.reset(base_state, self.shared_info)
@@ -83,15 +84,15 @@ class RocketLeague(dm_env.Environment):
         return dm_env.transition(rewards, observations, self.discount)
 
     def observation_spec(self):
-        return {k: self._observation_spec for k in self.engine.agents}
+        return {k: self._observation_spec for k in self.agents}
 
     def action_spec(self):
-        return {k: self._action_spec for k in self.engine.agents}
+        return {k: self._action_spec for k in self.agents}
 
     def reward_spec(self):
         spec = super().reward_spec()
-        return {k: spec for k in self.engine.agents}
+        return {k: spec for k in self.agents}
 
     def discount_spec(self):
         spec = super().discount_spec()
-        return {k: spec for k in self.engine.agents}
+        return {k: spec for k in self.agents}
