@@ -39,7 +39,7 @@ class RocketLeague(dm_env.Environment):
         self.shared_info = {}
         base_state = self.engine.create_base_state()
         for mutator in self.state_mutators:
-            base_state = mutator.apply(base_state, self.shared_info)
+            mutator.apply(base_state, self.shared_info)
         agents = list(base_state.cars.keys())
         self.num_agents = len(agents)
         self.agents = agents
