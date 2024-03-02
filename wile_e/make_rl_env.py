@@ -38,13 +38,6 @@ class FixedLookupTableAction(ActionParser[AgentID, np.ndarray, np.ndarray, GameS
     def parse_actions(self, actions: Dict[AgentID, np.ndarray], state: GameState, shared_info: Dict[str, Any]) -> Dict[AgentID, np.ndarray]:
         parsed_actions = {}
         for agent, action in actions.items():
-            # Action can have shape (Ticks, 1) or (Ticks)
-            assert len(action.shape) == 1 or (len(action.shape) == 2 and action.shape[1] == 1), (
-                "Action can have shape (Ticks, 1) or (Ticks), got: {}".format(action.shape))
-
-            if len(action.shape) == 2:
-                action = action.squeeze(1)
-
             parsed_actions[agent] = self._lookup_table[action]
 
         return parsed_actions
