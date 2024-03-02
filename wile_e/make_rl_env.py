@@ -15,7 +15,7 @@ from wile_e.dm_rl import RocketLeague
 
 class FixKeyMutator(StateMutator[GameState]):
     # Acme uses '-' as a separator for learner names, so we need to replace it with '_'
-    def apply(self, state: StateType, shared_info: Dict[str, Any]) -> None:
+    def apply(self, state: GameState, shared_info: Dict[str, Any]) -> None:
         for key in list(state.cars.keys()):
             state.cars[key.replace("-", "_")] = state.cars.pop(key)
 

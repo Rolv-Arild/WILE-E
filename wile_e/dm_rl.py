@@ -44,6 +44,8 @@ class RocketLeague(dm_env.Environment):
         self.num_agents = len(agents)
         self.agents = agents
 
+        self.engine.set_state(base_state, self.shared_info)
+
         self.obs_builder.reset(base_state, self.shared_info)
         self.action_parser.reset(base_state, self.shared_info)
         self.reward_function.reset(base_state, self.shared_info)
