@@ -81,9 +81,10 @@ class RocketLeague(dm_env.Environment):
                                                    self.shared_info)
         if is_terminated:
             return dm_env.termination(rewards, observations)
+        discount = {a: self.discount for a in agents}
         if is_truncated:
-            return dm_env.truncation(rewards, observations, self.discount)
-        return dm_env.transition(rewards, observations, self.discount)
+            return dm_env.truncation(rewards, observations, discount)
+        return dm_env.transition(rewards, observations, discount)
 
     def observation_spec(self):
         return {k: self._observation_spec for k in self.agents}
