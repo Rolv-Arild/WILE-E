@@ -59,7 +59,7 @@ def build_experiment_config() -> experiments.ExperimentConfig[
         for a in environment.agents  # pytype: disable=attribute-error
     }
     # Example of how to set custom sub-agent configurations.
-    ppo_configs = {'unroll_length': 16, 'num_minibatches': 32, 'num_epochs': 10, "num_sgd_steps": 1}
+    ppo_configs = {'num_minibatches': 32, 'num_epochs': 10}
     config_overrides = {
         k: ppo_configs for k, v in agent_types.items() if v == 'ppo'
     }
