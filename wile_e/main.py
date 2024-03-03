@@ -1,3 +1,4 @@
+import os
 from typing import Callable, Dict
 
 from absl import flags
@@ -84,7 +85,7 @@ def main(_):
     config = build_experiment_config()
     if _RUN_DISTRIBUTED.value:
         program = experiments.make_distributed_experiment(
-            experiment=config, num_actors=64)
+            experiment=config, num_actors=os.cpu_count())
         lp.launch(program, xm_resources=lp_utils.make_xm_docker_resources(program))
     else:
         experiments.run_experiment(

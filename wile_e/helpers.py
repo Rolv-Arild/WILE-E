@@ -26,7 +26,7 @@ class CategoricalParams(NamedTuple):
 
 def make_rl_ppo_networks(
         environment_spec: specs.EnvironmentSpec,
-        hidden_layer_sizes: Sequence[int] = (64, 64),
+        hidden_layer_sizes: Sequence[int] = (512, 512, 512, 512),
 ) -> ppo.PPONetworks:
     """Returns PPO networks used by the agent in the rl environments."""
 
