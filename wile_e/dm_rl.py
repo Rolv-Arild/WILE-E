@@ -15,7 +15,7 @@ class RocketLeague(dm_env.Environment):
             reward_function: RewardFunction,
             terminal_conditions: List[DoneCondition],
             truncation_conditions: List[DoneCondition],
-            discount: float = 1.0,
+            # discount: float = 1.0,
             action_spec=None,
             observation_spec=None,
     ):
@@ -26,7 +26,7 @@ class RocketLeague(dm_env.Environment):
         self.reward_function = reward_function
         self.terminal_conditions = terminal_conditions
         self.truncation_conditions = truncation_conditions
-        self.discount = discount
+        # self.discount = discount
         self.shared_info = {}
 
         self.num_agents = 2
@@ -81,10 +81,10 @@ class RocketLeague(dm_env.Environment):
                                                    self.shared_info)
         if is_terminated:
             return dm_env.termination(rewards, observations)
-        discount = {a: self.discount for a in agents}
+        # discount = {a: self.discount for a in agents}
         if is_truncated:
-            return dm_env.truncation(rewards, observations, discount)
-        return dm_env.transition(rewards, observations, discount)
+            return dm_env.truncation(rewards, observations)
+        return dm_env.transition(rewards, observations)
 
     def observation_spec(self):
         return {k: self._observation_spec for k in self.agents}
@@ -98,4 +98,4 @@ class RocketLeague(dm_env.Environment):
 
     def discount_spec(self):
         spec = super().discount_spec()
-        return {k: spec for k in self.agents}
+        return spec  # {k: spec for k in self.agents}

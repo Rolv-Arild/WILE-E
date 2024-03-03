@@ -118,7 +118,7 @@ def make_rl_environment(seed):
     terminal_conditions = [GoalCondition()]
     truncation_conditions = [NoTouchTimeoutCondition(60), TimeoutCondition(5 * 60)]
     env = RocketLeague(state_mutators, obs_builder, action_parser, reward_function,
-                       terminal_conditions, truncation_conditions, discount=0.995,
+                       terminal_conditions, truncation_conditions,  # discount=0.995,
                        action_spec=specs.DiscreteArray(90, name="action_index"),
                        observation_spec=specs.Array((obs_builder.get_obs_space(None),),
                                                     dtype=float,
