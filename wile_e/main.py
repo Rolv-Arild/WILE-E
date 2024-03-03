@@ -84,7 +84,7 @@ def main(_):
     config = build_experiment_config()
     if _RUN_DISTRIBUTED.value:
         program = experiments.make_distributed_experiment(
-            experiment=config, num_actors=4)
+            experiment=config, num_actors=64)
         lp.launch(program, xm_resources=lp_utils.make_xm_docker_resources(program))
     else:
         experiments.run_experiment(
