@@ -21,6 +21,7 @@ class VelocityPlayerToBallReward(RewardFunction[str, GameState, float]):
         for agent in agents:
             vel = state.cars[agent].physics.linear_velocity
             player_ball = state.ball.position - state.cars[agent].physics.position
+            player_ball /= np.linalg.norm(player_ball)
             rewards[agent] = vel.dot(player_ball) / CAR_MAX_SPEED
         return rewards
 
